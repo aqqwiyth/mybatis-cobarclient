@@ -1,0 +1,69 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+        http://www.springframework.org/schema/util  http://www.springframework.org/schema/util/spring-util-2.5.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+    <bean id="router" class="com.alibaba.cobarclient.config.SimpleRouterFactoryBean">
+        <property name="configLocations">
+            <list>
+                <value>classpath:/dbrule/sharding-rules-on-namespace.xml</value>
+            </list>
+        </property>
+        <property name="shards" ref="shardSet"/>
+    </bean>
+    <!--mybatis扫描指定的接口包-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.raycloud.demo.dao"/>
+    </bean>
+    <!--因为使用mybatis的一样都是纯注解形式的,喜欢xml配置的话推荐使用ibatis-->
+    <bean id="sqlSession" class="com.raycloud.cobarclient.mybatis.spring.MySqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+        <property name="router" ref="router"/>
+        <property name="shards" ref="shardSet"/>
+    </bean>
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--默认数据源,没有找到路由规则的时候向这个库读写数据-->
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <property name="mapperLocations" value="classpath*:mybatis/sqlmapper/*.xml"/>
+    </bean>
+
+
+    <tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+    <bean id="txManager"
+          class="com.alibaba.cobarclient.transaction.MyBestEffortMultiDataSourceTransactionManager">
+        <property name="shards" ref="shardSet"/>
+        <property name="transactionSynchronization" value="2"/>
+    </bean>
+
+    <util:set id="shardSet" set-class="java.util.LinkedHashSet">
+        <ref local="master"/>
+        <ref local="slave_1"/>
+        <ref local="slave_2"/>
+    </util:set>
+
+    <bean id="master" class="com.alibaba.cobarclient.Shard">
+        <property name="id" value="master"/>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <bean id="slave_1" class="com.alibaba.cobarclient.Shard">
+        <property name="id" value="slave_1"/>
+        <property name="dataSource" ref="dataSource1"/>
+    </bean>
+    <bean id="slave_2" class="com.alibaba.cobarclient.Shard">
+        <property name="id" value="slave_2"/>
+        <property name="dataSource" ref="dataSource2"/>
+    </bean>
+
+
+</beans>

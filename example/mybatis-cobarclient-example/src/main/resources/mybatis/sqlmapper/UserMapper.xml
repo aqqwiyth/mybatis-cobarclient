@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.raycloud.demo.dao.UserMapper">
+    <select id="getUserByUsername" parameterType="string" resultType="user">
+        select user_nick  as userNick ,user_id as userId from user where user_nick=#{nickName}
+  </select>
+
+    <insert id="insertUser" parameterType="user">
+      INSERT INTO user (user_nick, user_id)
+        VALUES (#{userNick}, #{userId})
+    </insert>
+
+    <update id="updateUser" parameterType="user">
+    UPDATE use SET user_id = #{userId}
+    WHERE user_nick = #{userNick}
+    </update>
+
+    <select id="getUserList" resultType="user">
+        select user_nick  as userNick ,user_id as userId from user
+  </select>
+
+    <delete id="deleteUser" parameterType="string">
+      DELETE  from user where user_nick=#{nickName}
+    </delete>
+</mapper>

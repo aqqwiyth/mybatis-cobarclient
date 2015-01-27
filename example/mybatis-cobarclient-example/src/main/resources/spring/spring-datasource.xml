@@ -1,0 +1,74 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+        http://www.springframework.org/schema/util  http://www.springframework.org/schema/util/spring-util-2.5.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${master.url}"/>
+        <property name="username" value="${master.username}"/>
+        <property name="password" value="${master.password}"/>
+        <property name="filters" value="config,stat,mergeStat"/>
+        <property name="maxActive" value="${master.maxActive}"/>
+        <property name="initialSize" value="${master.initialSize}"/>
+        <property name="maxWait" value="${master.maxWait}"/>
+        <property name="minIdle" value="${master.minIdle}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="3000"/>
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="${master.maxPoolPreparedStatementPerConnectionSize}"/>
+    </bean>
+    <bean id="dataSource1" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${slave1.url}"/>
+        <property name="username" value="${slave1.username}"/>
+        <property name="password" value="${slave1.password}"/>
+        <property name="filters" value="config,stat,mergeStat"/>
+        <property name="maxActive" value="${slave1.maxActive}"/>
+        <property name="initialSize" value="${slave1.initialSize}"/>
+        <property name="maxWait" value="${slave1.maxWait}"/>
+        <property name="minIdle" value="${slave1.minIdle}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="3000"/>
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="${slave1.maxPoolPreparedStatementPerConnectionSize}"/>
+    </bean>
+
+    <bean id="dataSource2" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${slave2.url}"/>
+        <property name="username" value="${slave2.username}"/>
+        <property name="password" value="${slave2.password}"/>
+        <property name="filters" value="config,stat,mergeStat"/>
+        <property name="maxActive" value="${slave2.maxActive}"/>
+        <property name="initialSize" value="${slave2.initialSize}"/>
+        <property name="maxWait" value="${slave2.maxWait}"/>
+        <property name="minIdle" value="${slave2.minIdle}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="3000"/>
+        <property name="minEvictableIdleTimeMillis" value="300000"/>
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="poolPreparedStatements" value="true"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="${slave2.maxPoolPreparedStatementPerConnectionSize}"/>
+    </bean>
+
+</beans>
