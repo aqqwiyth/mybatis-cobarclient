@@ -1,9 +1,10 @@
 package com.alibaba.cobarclient.transaction;
 
-import com.alibaba.cobarclient.Shard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import com.alibaba.cobarclient.Shard;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.*;
@@ -31,8 +32,27 @@ public class MyBestEffortMultiDataSourceTransactionManager extends AbstractPlatf
     @Override
     protected void doBegin(Object o, TransactionDefinition transactionDefinition) throws TransactionException {
         List<TransactionStatus> statusList = (List<TransactionStatus>) o;
-        for (AbstractPlatformTransactionManager transactionManager : transactionManagers) {
-            statusList.add(transactionManager.getTransaction(transactionDefinition));
+        try {
+            for (AbstractPlatformTransactionManager transactionManager : transactionManagers) {
+                statusList.add(transactionManager.getTransaction(transactionDefinition));
+            }
+        } catch (Throwable e) {
+            //多个库开启事务成功,某个数据库闪断会导致开启失败的场景下. 回收已开启的状态
+            logger.error("存在数据库开启事务失败,可能是数据库闪断或者无法连接,强制回滚之前开启的事务:" + e.getMessage(), e);
+            for (int i = 0; i < statusList.size(); i++) {
+                AbstractPlatformTransactionManager transactionManager = transactionManagers.get(i);
+                TransactionStatus status = statusList.get(i);
+                try {
+                    transactionManager.rollback(status);
+                } catch (TransactionException ex) {
+                    ;
+                }
+            }
+            if (e instanceof TransactionException) {
+                throw (TransactionException) e;
+            } else {
+                throw new TransactionSystemException("存在数据库开启事务失败,强制回滚:" + e.getMessage(), e);
+            }
         }
     }
 
